@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>音游开字母</title>
+        <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+        <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+        <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+        <style>
+            .grid-container{
+                display: grid;
+                grid-template-columns: auto auto auto auto auto;
+                gap: 10px;
+                justify-content: space-evenly;
+                align-content: space-evenly;
+                padding: 10px;
+            }
+
+            .grid-item{
+                border: 2px solid gray;
+                border-radius: 3px;
+                background-color: aliceblue;
+                text-align: center;
+                padding: 15px;
+            }
+
+            @media screen and (max-width: 720px) {
+                .grid-item{
+                    padding: 5px;
+                }
+                .grid-container{
+                    grid-template-columns: auto auto auto;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1 class="text-center" style="margin-top: 15px;">音游开字母</h1>
+        <p class="text-center"></p>
+
+        <div class="container">
+           <div class="card text-dark">
+                <div class="card-header"></div>
+                <div class="card-body">
+                    <ul></ul>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-8">
+                            <input placeholder="输入字母..." class="form-control" style="width: 100%;" />
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-success btn-block" >开字母/猜歌</button>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+
+        <div class="container" style="margin-top: 15px;">
+            <div class="card bg-light text-dark">
+                <div class="card-body grid-container">
+                    <button class="grid-item" value="phi">Phigros原创曲目</button>
+                    <button class="grid-item" value="arc">Arcaea原创曲目</button>
+                    <button class="grid-item" value="la">Lanota著名曲目</button>
+                    <button class="grid-item" value="bof">BOF著名曲目</button>
+                    <button class="grid-item">敬请期待...</button>
+                </div>
+                <div class="card-footer d-inline-flex">
+                    <div class="p-2 flex-grow-1"></div>
+                    <button id="button-start" class="btn btn-success p-3 align-self-center">开始</button>
+                    <div class="p-2 flex-grow-1"></div>
+                </div>
+            </div> 
+        </div>
+
+        <script>
+            $(".grid-item").hover(
+                function(){
+                    $(this).animate({opacity:"0.6"},100);
+                },
+                function(){
+                    $(this).animate({opacity:"1.0"},100);
+                }
+            )
+            .attr("choosed","false")
+            .click(function(){
+                if($(this).attr("choosed")=="true"){
+                    $(this).css("background-color","aliceblue")
+                    .attr("choosed","false");
+                }else{
+                    $(this).css("background-color","gray")
+                    .attr("choosed","true");
+                }
+            });
+
+            $("#button-start").click(function(){
+                var choosed=$(".grid-item[value][choosed=true]");
+                var choosedVal=[];
+                for(i of choosed){
+                    choosedVal.push($(i).val());
+                }
+
+                //$.get("https://ddnet.org",function(data,status){
+                    var data=JSON.parse('{"phi":["NO ONE YES MAN","Break Over"],"arc":["Ignotus","Red and Blue"]}');
+                    var songs=[];
+                    for(i of choosedVal){
+                        songs=songs.concat(data[i]);
+                    }
+                    
+                    
+                //})
+
+
+            });
+        </script>
+    </body>
+</html>
