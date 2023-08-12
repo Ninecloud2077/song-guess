@@ -103,15 +103,13 @@
                     choosedVal.push($(i).val());
                 }
 
-                //$.get("https://ddnet.org",function(data,status){
+                $.get("https://Ninecloud2077.github.io/song-guess/songs.json",function(data,status){
                     var data=JSON.parse('{"phi":["NO ONE YES MAN","Break Over"],"arc":["Ignotus","Red and Blue"]}');
                     var songs=[];
                     for(i of choosedVal){
                         songs=songs.concat(data[i]);
                     }
-                    
-                    
-                //})
+                })
 
 
             });
