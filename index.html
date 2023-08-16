@@ -8,33 +8,8 @@
         <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
         <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-        <style>
-            .grid-container{
-                display: grid;
-                grid-template-columns: auto auto auto auto auto;
-                gap: 10px;
-                justify-content: space-evenly;
-                align-content: space-evenly;
-                padding: 10px;
-            }
-
-            .grid-item{
-                border: 2px solid gray;
-                border-radius: 3px;
-                background-color: aliceblue;
-                text-align: center;
-                padding: 15px;
-            }
-
-            @media screen and (max-width: 720px) {
-                .grid-item{
-                    padding: 5px;
-                }
-                .grid-container{
-                    grid-template-columns: auto auto auto;
-                }
-            }
-        </style>
+        <script src="api.js"></script>
+        <link rel="stylesheet" href="style.css" />
     </head>
     <body>
         <h1 class="text-center" style="margin-top: 15px;">音游开字母</h1>
@@ -44,15 +19,15 @@
            <div class="card text-dark">
                 <div class="card-header"></div>
                 <div class="card-body">
-                    <ul></ul>
+                    <ul id="puzzles"></ul>
                 </div>
                 <div class="card-footer">
                     <div class="row">
                         <div class="col-8">
-                            <input placeholder="输入字母..." class="form-control" style="width: 100%;" />
+                            <input placeholder="输入字母..." id="game-input" class="form-control" />
                         </div>
                         <div class="col-4">
-                            <button type="button" class="btn btn-success btn-block" >开字母/猜歌</button>
+                            <button type="button" id="game-check" class="btn btn-success btn-block" >开字母/猜歌</button>
                         </div>
                     </div>
                 </div>
@@ -63,20 +38,52 @@
             <div class="card bg-light text-dark">
                 <div class="card-body grid-container">
                     <button class="grid-item" value="phi">Phigros原创曲目</button>
-                    <button class="grid-item" value="arc">Arcaea原创曲目</button>
+                    <button class="grid-item" value="arc">Arcaea著名曲目</button>
                     <button class="grid-item" value="la">Lanota著名曲目</button>
                     <button class="grid-item" value="bof">BOF著名曲目</button>
                     <button class="grid-item">敬请期待...</button>
                 </div>
-                <div class="card-footer d-inline-flex">
-                    <div class="p-2 flex-grow-1"></div>
-                    <button id="button-start" class="btn btn-success p-3 align-self-center">开始</button>
-                    <div class="p-2 flex-grow-1"></div>
+                <div class="card-footer d-inline-flex justify-content-center">
+                    <button id="button-start" class="btn btn-success p-3">开始</button>
                 </div>
             </div> 
         </div>
 
         <script>
+            var songLib=[],choosedVal=[];
+
+            $("#game-check").click(function(){
+                var inputed=$("#game-input").val();
+                if(!inputed){return;}
+                $("#game-input").val("");
+                var choosedBtn=$(".puzzle-guess.btn-danger");
+
+                if(choosedBtn.length==0){
+                    inputed=inputed[0].toLowerCase();
+                    for(var i=0;i<choosedVal.length;i++){
+                        for(var j=0;j<choosedVal[i].length;j++){
+                            if(choosedVal[i][j].toLowerCase()==inputed){
+                                $(".puzzle").eq(i).text(function(s,o){
+                                    return singleRep(o,j,choosedVal[i][j]);
+                                });
+                            }
+                        }
+                    }
+
+                }else if(choosedBtn.length==1){
+                    console.log(choosedBtn.parent().index());
+                    var songIndex=choosedVal[choosedBtn.parent().parent().index()];
+                    if(inputed.toLowerCase()==songIndex.toLowerCase()){
+                        choosedBtn.prev().text(songIndex);
+                        choosedBtn.attr("disabled","")
+                        .removeClass("puzzle-guess");
+                    }
+                    puzzleClose(choosedBtn);
+                    $("#game-input").attr("placeholder","输入字母...");
+                }
+            });
+
+
             $(".grid-item").hover(
                 function(){
                     $(this).animate({opacity:"0.6"},100);
@@ -96,22 +103,93 @@
                 }
             });
 
+            
+            function getSongs(){
+                var results;
+                $.ajax({
+                    async:false,
+                    url:"https://ninecloud2077.github.io/song-guess/songs.json",
+                    success:function(data){
+                        results=data;
+                    }
+                });
+                return results;
+            }
+
+            function refreshPuzzle(choosed){
+                var texts=[];
+
+                for(var i=0;i<choosed.length;i++){
+                    var dots=choosed[i].split(" ");
+                    var spans="";
+                    for(var j=0;j<dots.length;j++){
+                        spans+='*'.repeat(dots[j].length)+" ";
+                    }
+
+                    texts.push(
+                        $("<li></li>")
+                        .append([
+                            $("<b></b>").text(i+1+". "),
+                            $("<div></div>").addClass("d-flex justify-content-between mb-2").append([
+                                $("<span></span>").addClass("puzzle p-6").text(spans),
+                                $("<button>开歌</button>").addClass("btn btn-success btn-sm p-2 puzzle-guess").attr("choosed","false")
+                            ]),
+                        ])
+                    );
+                }
+                
+                return texts;
+            }
+
+            function puzzleOpen(target){
+                $(target).removeClass("btn-success")
+                .addClass("btn-danger")
+                .text("取消")
+                .attr("choosed","true");
+            }
+            function puzzleClose(target){
+                $(target).removeClass("btn-danger")
+                .addClass("btn-success")
+                .text("开歌")
+                .attr("choosed","false");
+            }
+
+
+            setTimeout(function(){
+                songLib=getSongs();
+            });
+
             $("#button-start").click(function(){
-                var choosed=$(".grid-item[value][choosed=true]");
-                var choosedVal=[];
-                for(i of choosed){
-                    choosedVal.push($(i).val());
+                $(this).empty()
+                .append('<span class="spinner-border spinner-border-sm"></span>')
+                .attr("disabled","");
+
+                var vals=$(".grid-item[value][choosed=true]");
+                if(vals.length!=0){
+                    choosedVal=[];
+                    for(i of vals){
+                        choosedVal=choosedVal.concat(songLib[$(i).val()]);
+                    }
+                    choosedVal=shuffle(choosedVal);
+
+                    $("#puzzles").empty()
+                    .append(refreshPuzzle(choosedVal));
+
+                    $(".puzzle-guess").click(function(){
+                        if($(this).attr("choosed")=="false"){
+                            puzzleClose(".puzzle-guess");
+                            puzzleOpen(this);
+                            $("#game-input").attr("placeholder","猜曲名...");
+                        }else{
+                            puzzleClose(this);
+                            $("#game-input").attr("placeholder","输入字母...");
+                        }
+                    });
                 }
 
-                $.get("https://Ninecloud2077.github.io/song-guess/songs.json",function(data,status){
-                    var data=JSON.parse('{"phi":["NO ONE YES MAN","Break Over"],"arc":["Ignotus","Red and Blue"]}');
-                    var songs=[];
-                    for(i of choosedVal){
-                        songs=songs.concat(data[i]);
-                    }
-                })
-
-
+                $(this).empty()
+                .text("开始")
+                .removeAttr("disabled");
             });
         </script>
     </body>
