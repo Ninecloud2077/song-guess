@@ -27,7 +27,7 @@
                             <input placeholder="输入字母..." id="game-input" class="form-control" />
                         </div>
                         <div class="col-4">
-                            <button type="button" id="game-check" class="btn btn-success btn-block" >开字母/猜歌</button>
+                            <button type="button" id="game-check" class="btn btn-success btn-block">开字母/猜歌</button>
                         </div>
                     </div>
                 </div>
@@ -168,7 +168,10 @@
                 if(vals.length!=0){
                     choosedVal=[];
                     for(i of vals){
-                        choosedVal=choosedVal.concat(songLib[$(i).val()]);
+                        var v=songLib[$(i).val()];
+                        if(v){
+                            choosedVal=choosedVal.concat(v);
+                        }
                     }
                     choosedVal=shuffle(choosedVal);
 
