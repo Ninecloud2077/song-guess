@@ -22,6 +22,11 @@
     border-radius: 10%;
 }
 
+#puzzles-container{
+    height: 400px;
+    overflow: auto;
+}
+
 @media screen and (max-width: 720px) {
     .grid-item{
         padding: 5px;

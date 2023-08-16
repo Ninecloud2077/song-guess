@@ -18,7 +18,7 @@
         <div class="container">
            <div class="card text-dark">
                 <div class="card-header"></div>
-                <div class="card-body">
+                <div id="puzzles-container" class="card-body">
                     <ul id="puzzles"></ul>
                 </div>
                 <div class="card-footer">
@@ -36,12 +36,18 @@
 
         <div class="container" style="margin-top: 15px;">
             <div class="card bg-light text-dark">
-                <div class="card-body grid-container">
-                    <button class="grid-item" value="phi">Phigros原创曲目</button>
-                    <button class="grid-item" value="arc">Arcaea著名曲目</button>
-                    <button class="grid-item" value="la">Lanota著名曲目</button>
-                    <button class="grid-item" value="bof">BOF著名曲目</button>
-                    <button class="grid-item">敬请期待...</button>
+                <div class="card-body">
+                    <div class="grid-container">
+                        <button class="grid-item" value="phi">Phigros原创曲目</button>
+                        <button class="grid-item" value="arc">Arcaea著名曲目</button>
+                        <button class="grid-item" value="la">Lanota著名曲目</button>
+                        <button class="grid-item" value="bof">BOF著名曲目</button>
+                        <button class="grid-item">敬请期待...</button>
+                    </div>
+                    <div class="container d-inline-flex justify-content-center">
+                        <p class="p-2" style="margin-bottom: 0;margin-top: 8px;">曲目数量：</p>
+                        <input type="number" id="input-number" class="p-3" />
+                    </div>
                 </div>
                 <div class="card-footer d-inline-flex justify-content-center">
                     <button id="button-start" class="btn btn-success p-3">开始</button>
@@ -166,6 +172,7 @@
 
                 var vals=$(".grid-item[value][choosed=true]");
                 if(vals.length!=0){
+                    var songCount=$("#input-number").val().toString();
                     choosedVal=[];
                     for(i of vals){
                         var v=songLib[$(i).val()];
@@ -173,7 +180,7 @@
                             choosedVal=choosedVal.concat(v);
                         }
                     }
-                    choosedVal=shuffle(choosedVal);
+                    choosedVal=shuffle(choosedVal).slice(0,songCount);
 
                     $("#puzzles").empty()
                     .append(refreshPuzzle(choosedVal));
