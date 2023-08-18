@@ -194,10 +194,10 @@
 
 
                 function refreshTime(){
-                    $("#puzzle-time").text(function(i,o){
-                        return (parseFloat(o)+1).toString();
-                    });
                     if($("#puzzle-completed").text()!=$("#puzzle-total").text()){
+                        $("#puzzle-time").text(function(i,o){
+                            return (parseFloat(o)+1).toString();
+                        });
                         setTimeout(refreshTime,1000);
                     }
                 }
