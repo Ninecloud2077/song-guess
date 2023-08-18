@@ -14,11 +14,45 @@
     <body>
         <div class="container">
             <h1 class="text-center" style="margin-top: 15px;">音游开字母</h1>
-            <p class="text-center"></p>
+            <p class="text-center">
+                选择需要游玩的题库（可多选），按下开始按钮；<br />
+                待曲目加载完毕后，在输入框中可以开字母；<br />
+                点击某曲目右侧的开歌按钮，并在输入框内输入对应歌曲（不区分大小写，半角英文括号）；<br />
+                若开歌正确，将会显示曲名。
+            </p>
 
-            <div class="container">
-            <div class="card text-dark">
-                    <div class="card-header"></div>
+            <div class="container" style="margin-top: 10px;">
+                <div class="card bg-light text-dark">
+                    <div class="card-body">
+                        <div class="grid-container">
+                            <button class="grid-item" value="phi">Phigros独占曲目</button>
+                            <button class="grid-item" value="arc">Arcaea著名曲目</button>
+                            <button class="grid-item">敬请期待...</button>
+                        </div>
+                        <div class="container d-inline-flex justify-content-center">
+                            <p class="p-2" style="margin-bottom: 0;margin-top: 8px;">曲目数量：</p>
+                            <input type="number" id="input-number" class="p-3" />
+                        </div>
+                    </div>
+                    <div class="card-footer d-inline-flex justify-content-center">
+                        <button id="button-start" class="btn btn-success p-3">开始</button>
+                    </div>
+                </div> 
+            </div>
+
+            <div class="container" style="margin-top: 20px;">
+                <div class="card text-dark">
+                    <div class="card-header">
+                        <p class="text-center">
+                            共开
+                            <span id="puzzle-total" class="num-lg">0</span>，
+                            已开
+                            <span id="puzzle-completed" class="num-lg">0</span>，
+                            用时
+                            <span id="puzzle-time" class="num-lg">0</span>
+                        </p>
+                        
+                    </div>
                     <div id="puzzles-container" class="card-body">
                         <ul id="puzzles"></ul>
                     </div>
@@ -35,29 +69,14 @@
                 </div> 
             </div>
 
-            <div class="container" style="margin-top: 15px;">
-                <div class="card bg-light text-dark">
-                    <div class="card-body">
-                        <div class="grid-container">
-                            <button class="grid-item" value="phi">Phigros原创曲目</button>
-                            <button class="grid-item" value="arc">Arcaea著名曲目</button>
-                            <button class="grid-item" value="la">Lanota著名曲目</button>
-                            <button class="grid-item" value="bof">BOF著名曲目</button>
-                            <button class="grid-item">敬请期待...</button>
-                        </div>
-                        <div class="container d-inline-flex justify-content-center">
-                            <p class="p-2" style="margin-bottom: 0;margin-top: 8px;">曲目数量：</p>
-                            <input type="number" id="input-number" class="p-3" />
-                        </div>
-                    </div>
-                    <div class="card-footer d-inline-flex justify-content-center">
-                        <button id="button-start" class="btn btn-success p-3">开始</button>
-                    </div>
-                </div> 
-            </div>
-
             <script>
                 var songLib=[],choosedVal=[];
+
+                function completedAdd(){
+                    $("#puzzle-completed").text(function(i,o){
+                        return (parseInt(o)+1).toString();
+                    });
+                }
 
                 $("#game-check").click(function(){
                     var inputed=$("#game-input").val();
@@ -75,15 +94,23 @@
                                     });
                                 }
                             }
+
+                            var p=$(".puzzle").eq(i);
+                            if(choosedVal[i]==p.text() && p.next().hasClass("puzzle-guess")){
+                                p.next()
+                                .attr("disabled","")
+                                .removeClass("puzzle-guess");
+                                completedAdd();
+                            }
                         }
 
                     }else if(choosedBtn.length==1){
-                        console.log(choosedBtn.parent().index());
                         var songIndex=choosedVal[choosedBtn.parent().parent().index()];
                         if(inputed.toLowerCase()==songIndex.toLowerCase()){
                             choosedBtn.prev().text(songIndex);
                             choosedBtn.attr("disabled","")
                             .removeClass("puzzle-guess");
+                            completedAdd();
                         }
                         puzzleClose(choosedBtn);
                         $("#game-input").attr("placeholder","输入字母...");
@@ -123,6 +150,7 @@
                     return results;
                 }
 
+
                 function refreshPuzzle(choosed){
                     var texts=[];
 
@@ -132,6 +160,7 @@
                         for(var j=0;j<dots.length;j++){
                             spans+='*'.repeat(dots[j].length)+" ";
                         }
+                        spans=spans.trimEnd();
 
                         texts.push(
                             $("<li></li>")
@@ -148,17 +177,29 @@
                     return texts;
                 }
 
+
                 function puzzleOpen(target){
                     $(target).removeClass("btn-success")
                     .addClass("btn-danger")
                     .text("取消")
                     .attr("choosed","true");
                 }
+
                 function puzzleClose(target){
                     $(target).removeClass("btn-danger")
                     .addClass("btn-success")
                     .text("开歌")
                     .attr("choosed","false");
+                }
+
+
+                function refreshTime(){
+                    $("#puzzle-time").text(function(i,o){
+                        return (parseFloat(o)+1).toString();
+                    });
+                    if($("#puzzle-completed").text()!=$("#puzzle-total").text()){
+                        setTimeout(refreshTime,1000);
+                    }
                 }
 
 
@@ -172,8 +213,8 @@
                     .attr("disabled","");
 
                     var vals=$(".grid-item[value][choosed=true]");
-                    if(vals.length!=0){
-                        var songCount=$("#input-number").val().toString();
+                    var songCount=$("#input-number").val().toString();
+                    if(vals.length!=0 && songCount>0){
                         choosedVal=[];
                         for(i of vals){
                             var v=songLib[$(i).val()];
@@ -185,6 +226,11 @@
 
                         $("#puzzles").empty()
                         .append(refreshPuzzle(choosedVal));
+
+                        $("#puzzle-total").text(choosedVal.length.toString());
+                        $("#puzzle-completed").text("0");
+                        $("#puzzle-time").text("0");
+                        setTimeout(refreshTime,1000);
 
                         $(".puzzle-guess").click(function(){
                             if($(this).attr("choosed")=="false"){

@@ -15,15 +15,13 @@
     padding: 15px;
 }
 
-.letter{
-    display: block;
-    width: 21px;
-    background-color: darkslategray;
-    border-radius: 10%;
+.num-lg{
+    color: coral;
+    font-size: xx-large;
 }
 
 #puzzles-container{
-    height: 400px;
+    height: 300px;
     overflow: auto;
 }
 
